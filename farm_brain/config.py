@@ -32,7 +32,11 @@ class Config:
     MAX_CONTENT_LENGTH = 15 * 1024 * 1024
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER") or str(BASE_DIR / "instance" / "uploads")
     APP_ENV = os.getenv("APP_ENV", "development").lower()
-        # Temporary email verification bypass for prototype demonstrations.         # Temporary email verification bypass for prototype demonstrations.     DEMO_SKIP_EMAIL_VERIFICATION = os.getenv("DEMO_SKIP_EMAIL_VERIFICATION", "false").lower() == "true" = os.getenv("DEMO_SKIP_EMAIL_VERIFICATION", "false").lower() == "true" = os.getenv("    # Temporary email verification bypass for prototype demonstrations.     DEMO_SKIP_EMAIL_VERIFICATION = os.getenv("DEMO_SKIP_EMAIL_VERIFICATION", "false").lower() == "true"", "true").lower() == "true"
+
+    # Temporary email verification bypass for prototype demonstrations.
+    DEMO_SKIP_EMAIL_VERIFICATION = os.getenv("DEMO_SKIP_EMAIL_VERIFICATION", "false").lower() == "true"
+
+    OTP_DEV_MODE = os.getenv("OTP_DEV_MODE", "true").lower() == "true"
     OTP_TTL_MINUTES = int(os.getenv("OTP_TTL_MINUTES", "10"))
     OTP_MAX_ATTEMPTS = int(os.getenv("OTP_MAX_ATTEMPTS", "5"))
     OTP_RESEND_SECONDS = int(os.getenv("OTP_RESEND_SECONDS", "60"))
