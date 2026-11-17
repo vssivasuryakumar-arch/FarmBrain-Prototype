@@ -86,7 +86,41 @@ def register():
             for error in errors:
                 flash(error, "error")
             return render_template("auth/register.html", capabilities=CAPABILITIES, form=request.form), 400
+        # Prototype-only registration without email OTP.
+        if current_app.config.get("DEMO_SKIP_EMAIL_VERIFICATION", False):
+            from .features import make_handle
 
+            PendingRegistration.query.filter_by(email=email).delete(synchronize_session=False)
+            user = User(
+                name=name, email=email, password_hash=generate_password_hash(password),
+                phone=phone, city=city, state=state, country=country,
+            )
+            for capability in capabilities:
+                user.capabilities.append(CapabilityAssignment(capability=capability))
+            db.session.add(user)
+            try:
+                db.session.flush()
+                is_farmer = "Farmer / Grower" in capabilities
+                db.session.add(MemberProfile(
+                    user_id=user.id,
+                    handle=make_handle(user.name, user.id),
+                    plan_code="FARMER_BASIC_FREE" if is_farmer else "COMMUNITY_FREE",
+                ))
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                flash("An account with that email already exists. Please sign in instead.", "error")
+                return render_template(
+                    "auth/register.html", capabilities=CAPABILITIES, form=request.form,
+                ), 409
+
+            session.pop("pending_registration_email", None)
+            login_user(user)
+            flash(
+                "Prototype account created. Email verification is temporarily disabled; use test data only.",
+                "warning",
+            )
+            return redirect(url_for("main.dashboard"))
         pending = PendingRegistration.query.filter_by(email=email).first()
         if pending:
             expires = pending.expires_at
